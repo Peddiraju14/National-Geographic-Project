@@ -7,14 +7,31 @@ library(openxlsx)
 library(lme4)
 library(nlme)
 library(sjPlot)
+library(nlme)
+library(lsmeans)
 
-setwd("C:/Users/Peddiraju Bandaru/Desktop/LaCONES/ng_final/data")
+#setwd("C:/Users/Peddiraju Bandaru/Desktop/LaCONES/ng_final/data")
+setwd("C:/Users/Peddiraju Bandaru/Desktop/LaCONES/NG_Temp_Analyse/environment")
 sm_data <- read_excel("NG Hydrosense readings long form.xlsx")
 sm_data<- sm_data |> filter(!is.na(soil_moisture_percent))
 
-sm_model<-lmer(soil_moisture_percent ~ effect*Treatment + (effect*Treatment|month), data = sm_data)
+#sm_model<-lme(soil_moisture_percent ~ effect*Treatment + (1|plot_id)+(1|mon), data = sm_data) 
 
-sm_model_results<-as.data.frame(coef(summary(lme(soil_moisture_percent ~ effect * Treatment, random = ~ 1 | mon, data = sm_data))))
+# Fit the model using nlme
+sm_model_nlme <- lme(soil_moisture_percent ~ effect * Treatment,
+                     random = ~ 1 | plot_id / mon,
+                     data = sm_data)
+
+# Summarize the model
+summary(sm_model_nlme)
+#tuckey test
+lsmeans(sm_model_nlme, pairwise ~ Treatment | effect)
+lsmeans(sm_model_nlme, pairwise ~ effect|Treatment)
+tab_model(sm_model_nlme,show.aic = T,show.re.var = F)
+
+
+
+
 
 setwd("C:/Users/Peddiraju Bandaru/Desktop/LaCONES/ng_final/data/Model outputs/environment")
 write.csv(sm_model_results, file = "sm_model_results.csv", row.names = TRUE)
@@ -53,7 +70,7 @@ ggsave(sm_plot, filename = "sm_plot.jpeg", height = 8, width = 12, dpi = 600)
 
 ###############################################################################################
 ###############################################################################################
-
+# trial for other plot ytpes
 # Define colors for treatments
 treatment_colors <- c("control" = "deepskyblue", "drought" = "red")
 
