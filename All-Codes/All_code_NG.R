@@ -11,7 +11,7 @@
 # question-2b; biomass model, output and plots from line 165 to 293
 # question-3a; trait space, output and plots from line 297 to 339
 # question-3b; drought response, output and plots from line 342 to 656
-
+# supplementary: analysis and figure of traits and binomial survival data from lines 660 to 947
 
 library(tidyverse)
 library(broom)
@@ -654,5 +654,294 @@ Drought_response<-annotate_figure(Drought_response,
 
 setwd("C:/Users/Peddiraju Bandaru/Desktop/LaCONES/NG_Temp_Analyse/All_codes/output_all_codes")
 ggsave(Drought_response, filename = "Drought_response.jpeg", height = 10, width = 6.5, dpi = 600)
+
+
+#######################################################
+##supplementary analysis and figure for traits mediating survival(binomial data)
+
+
+setwd("C:/Users/Peddiraju Bandaru/Desktop/LaCONES/NG_Temp_Analyse/All_codes/raw_data")
+Data <- read_excel("survival_dat_raw.xls")
+
+# Join traits data (with PC1 and PC2) to the drought response data
+traits_survival_data <- Data %>% 
+  left_join(Traits_Dat_with_PC, by = "sp")
+
+#################################################### with PC1
+
+model_PC1 <- glmmTMB(Survival ~ PC1 * effect * treatment  + (1|sp), 
+                     family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                                optArgs=list(method="BFGS")), 
+                     data = trait_survival_data) # there is significance b/w edge control to interior drought
+
+#summary of model
+summary(model_PC1) # there is significance b/w edge control to interior drought
+tab_model(model_PC1,show.aic = T,show.re.var = F)
+
+#performing tuckey test for different factorial combinations
+emtrends(model_PC1, pairwise ~ effect*treatment, var = "PC1")
+
+
+#################################################### with PC2
+
+model_PC2 <- glmmTMB(Survival ~ PC2 * effect * treatment  + (1|sp), 
+                     family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                                optArgs=list(method="BFGS")), 
+                     data = trait_survival_data)
+
+#summary of model
+summary(model_PC2) # there is marginal significance b/w edge control to interior drought
+tab_model(model_PC2,show.aic = T,show.re.var = F)
+
+#performing tuckey test for different factorial combinations
+emtrends(model_PC2, pairwise ~ effect*treatment, var = "PC2")
+
+#################################################### with LMA
+
+model_LMA <- glmmTMB(Survival ~ LMA * effect * treatment  + (1|sp), 
+                     family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                                optArgs=list(method="BFGS")), 
+                     data = trait_survival_data)
+
+#summary of model
+summary(model_LMA) # there is marginal significance b/w edge control to interior drought
+tab_model(model_LMA,show.aic = T,show.re.var = F)
+
+#performing tuckey test for different factorial combinations
+emtrends(model_LMA, pairwise ~ effect*treatment, var = "LMA")
+
+
+#################################################### with LDMC
+
+model_LDMC <- glmmTMB(Survival ~ LDMC * effect * treatment  + (1|sp), 
+                      family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                                 optArgs=list(method="BFGS")), 
+                      data = trait_survival_data)
+
+#summary of model
+summary(model_LDMC) # there is marginal significance b/w edge control to interior drought
+tab_model(model_LDMC,show.aic = T,show.re.var = F)
+
+#performing tuckey test for different factorial combinations
+emtrends(model_LDMC, pairwise ~ effect*treatment, var = "LDMC")
+
+#################################################### with Leaf_area
+
+model_LA <- glmmTMB(Survival ~ Leaf_Area * effect * treatment  + (1|sp), 
+                    family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                               optArgs=list(method="BFGS")), 
+                    data = trait_survival_data)
+
+#summary of model
+summary(model_LA) # there is marginal significance b/w edge control to interior drought
+tab_model(model_LMA,show.aic = T,show.re.var = F)
+
+#performing tuckey test for different factorial combinations
+emtrends(model_LA, pairwise ~ effect*treatment, var = "Leaf_Area")
+
+#################################################### with SSD
+
+model_SSD <- glmmTMB(Survival ~ SSD * effect * treatment  + (1|sp), 
+                     family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                                optArgs=list(method="BFGS")), 
+                     data = trait_survival_data)
+
+#summary of model
+summary(model_SSD) # there is marginal significance b/w edge control to interior drought
+tab_model(model_SSD,show.aic = T,show.re.var = F)
+
+
+#performing tuckey test for different factorial combinations
+emtrends(model_SSD, pairwise ~ effect*treatment, var = "SSD")
+
+#################################################### with MRSD
+
+model_MRSD <- glmmTMB(Survival ~ MRSD * effect * treatment  + (1|sp), 
+                      family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                                 optArgs=list(method="BFGS")), 
+                      data = trait_survival_data)
+
+#summary of model
+summary(model_MRSD) # there is no significance b/w edge control to interior drought
+tab_model(model_LMA,show.aic = T,show.re.var = F)
+
+
+#performing tuckey test for different factorial combinations
+emtrends(model_MRSD, pairwise ~ effect*treatment, var = "MRSD")
+
+#################################################### with FRSD
+
+model_FRSD <- glmmTMB(Survival ~ FRSD * effect * treatment  + (1|sp), 
+                      family = binomial(link = "logit"),control = glmmTMBControl(optimizer=optim, 
+                                                                                 optArgs=list(method="BFGS")), 
+                      data = trait_survival_data)
+
+#summary of model
+summary(model_FRSD) # there is significance b/w edge control to interior drought
+tab_model(model_FRSD,show.aic = T,show.re.var = F)
+
+
+#performing tuckey test for different factorial combinations
+emtrends(model_FRSD, pairwise ~ effect*treatment, var = "FRSD")
+
+
+
+#Visualization
+a<-plot_model(model_PC1, type = "pred", terms = c("PC1", "treatment", "effect"), show.data = TRUE) +
+  ggtitle("(a)") + 
+  xlab("PC1") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+
+b<-plot_model(model_PC2, type = "pred", terms = c("PC2", "treatment", "effect"), show.data = TRUE) +
+  ggtitle("(b)") + 
+  xlab("PC2") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+
+c<-plot_model(model_LMA, type = "pred", terms = c("LMA", "treatment", "effect"), show.data = TRUE) +
+  ggtitle("(c)") + 
+  xlab("LMA") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+d<-plot_model(model_LDMC, type = "pred", terms = c("LDMC", "treatment", "effect"), show.data = TRUE) +
+  ggtitle("(d)") + 
+  xlab("LDMC") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+e<-plot_model(model_LA, type = "pred", terms = c("Leaf_Area", "treatment", "effect"), show.data = TRUE) +
+  ggtitle("(e)") + 
+  xlab("Leaf_Area") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+f<-plot_model(model_SSD, type = "pred", terms = c("SSD", "treatment","effect"), show.data = TRUE) +
+  ggtitle("(f)") + 
+  xlab("SSD") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+g<-plot_model(model_MRSD, type = "pred", terms = c("MRSD", "treatment", "effect"), show.data = TRUE) +
+  ggtitle("(g)") + 
+  xlab("MRSD") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+h<-plot_model(model_FRSD, type = "pred", terms = c("FRSD", "treatment", "effect"), show.data = TRUE) +
+  ggtitle("(h)") + 
+  xlab("FRSD") + 
+  ylab(NULL) +
+  geom_smooth(se = FALSE, linetype = 1, size = 2) +
+  scale_colour_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  scale_fill_manual(values = c("#56B4E9", "#D55E00"), labels = c("Control", "Drought"), name = "Treatment") +
+  theme_classic() +  
+  theme(
+    panel.grid = element_blank(),
+    axis.title = element_text(size = 15),
+    plot.title = element_text(hjust = 0),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "top",
+    legend.justification = "centre",
+    strip.text.x = element_text(size = 15, face = "bold")
+  )
+
+traits_survival<- ggarrange(a,b,c,d,e,f,g,h,
+                            common.legend = T,
+                            #labels = paste(letters[1:8], ".", sep=""),
+                            font.label = list(size=15),
+                            vjust = 0.5, ncol = 2, nrow = 4)
+
+
+traits_survival<-annotate_figure(traits_survival,
+                                 #top = text_grob("Visualizing len", color = "red", face = "bold", size = 14),
+                                 left = text_grob("Survival Probability", color = "black", rot = 90,size = 15),
+                                 #right = "I'm done, thanks :-)!",
+                                 #fig.lab = "Figure 1", fig.lab.face = "bold"
+)
+
+
+setwd("C:/Users/Peddiraju Bandaru/Desktop/LaCONES/NG_Temp_Analyse/All_codes/output_all_codes")
+ggsave(traits_survival, filename = "traits_survival.jpeg", height = 14, width = 8, dpi = 600)
 
 
